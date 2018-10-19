@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="jquery.js">
+    </script>
+    <style>
+        body,
+        html {
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        /*.template{*/
+        /*background-image: url("http://localhost/move/assets/img/bg1.jpg") !important;*/
+        /*background-repeat:no-repeat;*/
+        /*background-size:contain;*/
+        /*background-position: center;*/
+        /*}*/
+        
+        .food {
+            position: absolute;
+            left: 0;
+            top: 0;
+            border: 1px solid black;
+            border-radius: 10px;
+            height: 10px;
+            width: 10px;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Title of the document</title>
+</head>
+
+<body>
+    <div id="template" class="template" style="position:relative;width:100%;border:1px solid green;height:200px;z-index:1;background:white;overflow:hidden;padding:0;">
+        <div id="obj" class="obj" style="position:absolute;left:10px;top:10px;border:0px solid black;border-radius:10px;height:50px;width:50px;">
+            <img id="objImg" class="objImg" style="width: 100%;height: 100%;border:0px solid green" src="assets/img/fish.gif">
+        </div>
+    </div>
+    <script>
+        var obj = $("#obj");
+        var food;
+        var objImg = $("#objImg");
+        var obj2 = null;
+        var tempObj;
+        var position = obj.offset();
+        var position2;
+        var template = $("#template");
+        var positionTemplate = setOffset(template);
+        var statusOver = false;
+        var moveSpeed = 0;
+        var typeMove = 'left';
+        var timeAnimate = 1000;
+        var timeMoveTarget = 2000;
+        var maxMoving = 600;
+        var pause = true;
+        var rotateStatus = false;
+        var a, b, c, d, e, f, g, h, i, i1, i2, i3, j, x, y, temp;
+        var arr = [];
+        var arrImg = [];
+        var arrPosition = [];
+        var arrImgPosition = [];
+        var contentImg = '<img id="objImg" style="width: 100%;height: 100%" src="assets/img/fish.gif">';
+        var contentFood = '<div class="food"></div>';
+        var boxCenter = null;
+
+        typeMove = 'left';
+
+        function setOffset(obj) {
+            var a = obj.offset();
+            a.left = Math.round(a.left);
+            a.top = Math.round(a.top);
+            return a;
+        }
+
+        function getRandomInt(min, max) {
+            min = min * -1;
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        jQuery.fn.rotate = function(degrees) {
+
+            var elem = $(this);
+            pause = true;
+            setTimeout(function() {
+                pause = false;
+            }, timeAnimate);
+            a = getRotationDegrees(elem);
+            temp = a - degrees;
+            if (temp < 0) {
+                temp = temp * -1;
+            }
+            if (temp > 180) {
+                degrees = 360 - temp;
+                if (a > 180) {
+                    degrees = a + degrees;
+                } else {
+                    degrees = degrees * -1;
+                }
+            }
+            $({
+                deg: a
+            }).animate({
+                deg: degrees
+            }, {
+                duration: timeAnimate,
+                step: function(now) {
+                    elem.css({
+                        '-webkit-transform': 'rotate(' + now + 'deg)',
+                        '-moz-transform': 'rotate(' + now + 'deg)',
+                        '-ms-transform': 'rotate(' + now + 'deg)',
+                        'transform': "rotate(" + now + "deg)"
+                    });
+                }
+            });
+            return $(this);
+        };
+
+        function getRotationDegrees(obj) {
+            var matrix = obj.css("-webkit-transform") ||
+                obj.css("-moz-transform") ||
+                obj.css("-ms-transform") ||
+                obj.css("-o-transform") ||
+                obj.css("transform");
+            if (matrix !== 'none') {
+                var values = matrix.split('(')[1].split(')')[0].split(',');
+                var a = values[0];
+                var b = values[1];
+                var angle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
+            } else {
+                var angle = 0;
+            }
+            return (angle < 0) ? angle + 360 : angle;
+        }
+
+        document.addEventListener('keyup', function(e) {
+            e.preventDefault();
+            // if (e.which == 77) {
+            //     alert("M key was pressed");
+            // } else if (e.ctrlKey && e.which == 66) {
+            //     alert("Ctrl + B shortcut combination was pressed");
+            // }else if (e.ctrlKey && e.which == 86 && statusMenu==1) {
+            //
+            //     $("#"+previous.target.id).remove();
+            //     elementMove.remove();
+            //     console.log("elementMoved");
+            //     if(cloneID!=null&&clone!=null){
+            //         cloneID = null;
+            //         clone = null;
+            //     }
+            //     showalertDone();
+            //     statusMenu = 0;
+            // } else if (e.ctrlKey && e.altKey && e.which == 89) {
+            //     alert("Ctrl + Alt + Y shortcut combination was pressed");
+            // } else if (e.ctrlKey && e.altKey && e.shiftKey && e.which == 85) {
+            //     alert("Ctrl + Alt + Shift + U shortcut combination was pressed");
+            // }
+            if (e.which == 37) {
+                typeMove = 'left';
+                objImg.rotate(180);
+            } else if (e.which == 38) {
+                typeMove = 'top';
+                objImg.rotate(270);
+            } else if (e.which == 39) {
+                typeMove = 'right';
+                objImg.rotate(0);
+            } else if (e.which == 40) {
+                typeMove = 'bottom';
+                objImg.rotate(90);
+            } else {
+
+            }
+        });
+
+        a = $(".obj");
+        b = $(".objImg");
+        for (i = 0; i < a.length; i++) {
+            obj = a.eq(i);
+            objImg = b.eq(i);
+        }
+        i = 0;
+        i1 = 0;
+        i2 = 0;
+        i3 = 0;
+        for (j = 0; j < a.length; j++) {}
+        setInterval(function() {
+            x = objImg.offset().left;
+            y = objImg.offset().top;
+            x = getRandomInt(x, x + maxMoving);
+            a = false;
+            // check untuk tidak melewati border;
+            if (x < positionTemplate.left || x > positionTemplate.left + template.outerWidth()) {
+                a = true;
+            }
+            while (a) {
+                x = getRandomInt(x, x + maxMoving);
+                if (x < positionTemplate.left || x > positionTemplate.left + template.outerWidth()) {
+                    a = true;
+                } else {
+                    a = false;
+                }
+            }
+            y = getRandomInt(y, y + maxMoving);
+            a = false;
+            if (y < positionTemplate.top || y > positionTemplate.top + template.outerHeight()) {
+                a = true;
+            }
+            while (a) {
+                y = getRandomInt(y, y + maxMoving);
+                if (y < positionTemplate.top || y > positionTemplate.top + template.outerHeight()) {
+                    a = true;
+                } else {
+                    a = false;
+                }
+            }
+            boxCenter = [objImg.offset().left + objImg.width() / 2, objImg.offset().top + objImg.height() / 2];
+            temp = Math.atan2(x - boxCenter[0], -(y - boxCenter[1])) * (180 / Math.PI);
+            temp -= 90;
+            //objImg.css({
+            //    '-webkit-transform' : 'rotate('+ temp +'deg)',
+            //    '-moz-transform' : 'rotate('+ temp +'deg)',
+            //    '-ms-transform' : 'rotate('+ temp +'deg)',
+            //    'transform': "rotate(" + temp + "deg)"
+            //});
+            //objImg.rotate(temp);
+            a = getRotationDegrees(objImg);
+            if (a >= 180) {
+                if (temp < 0) {
+                    temp = 360 + (temp);
+                }
+            }
+            // rotate ke kanan
+            b = a + 179;
+            // rotate ke kiri
+            c = a - 179;
+            // status rotate khusus
+            f = 0;
+            // jika rotate ke kanan dan lebih 360;
+            if (b >= 360) {
+                b = b - 360;
+                if ((temp >= 0 && temp <= b)) {
+                    // status rotate khusus, jika rotate
+                    f = 1;
+                    d = 360 - a;
+                    // total rotate
+                    e = b + d;
+                }
+            }
+
+            if (f == 1) {
+                g = (d / 179) * timeAnimate;
+                $({
+                    deg: a
+                }).animate({
+                    deg: 360
+                }, {
+                    duration: g,
+                    step: function(now) {
+                        objImg.css({
+                            '-webkit-transform': 'rotate(' + now + 'deg)',
+                            '-moz-transform': 'rotate(' + now + 'deg)',
+                            '-ms-transform': 'rotate(' + now + 'deg)',
+                            'transform': "rotate(" + now + "deg)"
+                        });
+                    }
+                });
+                setTimeout(function() {
+                    h = (b / 179) * timeAnimate;
+                    $({
+                        deg: 0
+                    }).animate({
+                        deg: d
+                    }, {
+                        duration: h,
+                        step: function(now) {
+                            objImg.css({
+                                '-webkit-transform': 'rotate(' + now + 'deg)',
+                                '-moz-transform': 'rotate(' + now + 'deg)',
+                                '-ms-transform': 'rotate(' + now + 'deg)',
+                                'transform': "rotate(" + now + "deg)"
+                            });
+                        }
+                    });
+                    i1++;
+                }, g);
+
+            } else {
+                if (temp < 0) {
+                    temp = (temp + 360);
+                }
+                $({
+                    deg: a
+                }).animate({
+                    deg: temp
+                }, {
+                    duration: timeAnimate,
+                    step: function(now) {
+                        objImg.css({
+                            '-webkit-transform': 'rotate(' + now + 'deg)',
+                            '-moz-transform': 'rotate(' + now + 'deg)',
+                            '-ms-transform': 'rotate(' + now + 'deg)',
+                            'transform': "rotate(" + now + "deg)"
+                        });
+                    }
+                });
+            }
+
+            setTimeout(function() {
+                a = setOffset(obj);
+                b = setOffset(objImg);
+                c = b.left - a.left;
+                d = b.top - a.top;
+
+                if (a.left > x) {
+                    c = c * -1;
+                }
+                if (a.top > y) {
+                    d = d * -1;
+                }
+
+                if (a.left + objImg.outerWidth() > x) {
+                    obj.animate({
+                        // left: (e.clientX-objImg.outerWidth()-(c))+"px",
+                        // top : (e.clientY-(objImg.outerHeight()/2)+(d))+"px"
+                        left: (x - (c)) + "px",
+                        top: (y - (objImg.outerHeight() / 2) + (d)) + "px"
+                    }, timeMoveTarget);
+                } else {
+                    obj.animate({
+                        left: (x - objImg.outerWidth() - (c)) + "px",
+                        top: (y - (objImg.outerHeight() / 2) + (d)) + "px"
+                            // left: (e.clientX)+"px",
+                            // top : e.clientY+"px"
+                    }, timeMoveTarget);
+                }
+            }, timeAnimate);
+        }, timeAnimate + timeAnimate + timeMoveTarget);
+
+        document.addEventListener('click', function(e) {
+            food = $(contentFood);
+            template.append(food);
+            food.css({
+                "left": (e.clientX - food.outerWidth() / 2) + "px",
+                "top": (e.clientY - food.outerHeight() / 2) + "px",
+            });
+            boxCenter = [objImg.offset().left + objImg.width() / 2, objImg.offset().top + objImg.height() / 2];
+            temp = Math.atan2(e.pageX - boxCenter[0], -(e.pageY - boxCenter[1])) * (180 / Math.PI);
+            temp -= 90;
+            // console.log(temp);
+            // //objImg.rotate(temp);
+            // a = getRotationDegrees(objImg);
+            // if(a>=180){
+            // 	if(temp<0){
+            // 		temp = 360 + (temp);
+            // 	}
+            // }
+            // // rotate ke kanan
+            // b = a + 179;
+            // // rotate ke kiri
+            // c = a - 179;
+            // // status rotate khusus
+            // f = 0;
+            // // jika rotate ke kanan dan lebih 360;
+            // if(b>=360){
+            // 	b = b - 360;
+            // 	if((temp>=0&&temp<=b)){
+            // 		// status rotate khusus, jika rotate
+            // 		f = 1;
+            // 		d = 360 - a;
+            // 		// total rotate
+            // 		e = b+d;
+            // 	}
+            // }
+
+            // if(f==1){
+            // 	g = (d/179) * timeAnimate;
+            // 	$({deg: a}).animate({deg: 360}, {
+            // 		duration: g,
+            // 		step: function(now){
+            // 			objImg.css({
+            // 				'-webkit-transform' : 'rotate('+ now +'deg)',
+            // 				'-moz-transform' : 'rotate('+ now +'deg)',
+            // 				'-ms-transform' : 'rotate('+ now +'deg)',
+            // 				'transform': "rotate(" + now + "deg)"
+            // 			});
+            // 		}
+            // 	});
+            // 	setTimeout(function(){
+            // 		h = (b/179) * timeAnimate;
+            // 		$({deg: 0}).animate({deg: d}, {
+            // 			duration: h,
+            // 			step: function(now){
+            // 				objImg.css({
+            // 					'-webkit-transform' : 'rotate('+ now +'deg)',
+            // 					'-moz-transform' : 'rotate('+ now +'deg)',
+            // 					'-ms-transform' : 'rotate('+ now +'deg)',
+            // 					'transform': "rotate(" + now + "deg)"
+            // 				});
+            // 			}
+            // 		});
+            // 	},g);
+
+            // }else{
+            // 	if(temp<0){
+            // 		temp = (temp + 360);
+            // 	}
+            // 	$({deg: a}).animate({deg: temp}, {
+            // 		duration: timeAnimate,
+            // 		step: function(now){
+            // 			objImg.css({
+            // 				'-webkit-transform' : 'rotate('+ now +'deg)',
+            // 				'-moz-transform' : 'rotate('+ now +'deg)',
+            // 				'-ms-transform' : 'rotate('+ now +'deg)',
+            // 				'transform': "rotate(" + now + "deg)"
+            // 			});
+            // 		}
+            // 	});
+            // }
+            objImg.css({
+                '-webkit-transform': 'rotate(' + temp + 'deg)',
+                '-moz-transform': 'rotate(' + temp + 'deg)',
+                '-ms-transform': 'rotate(' + temp + 'deg)',
+                'transform': "rotate(" + temp + "deg)"
+            });
+
+            setTimeout(function() {
+                a = setOffset(obj);
+                b = setOffset(objImg);
+                c = b.left - a.left;
+                d = b.top - a.top;
+
+                if (a.left > e.clientX) {
+                    c = c * -1;
+                }
+                if (a.top > e.clientY) {
+                    d = d * -1;
+                }
+
+                if (a.left + obj.outerWidth() > e.clientX) {
+                    obj.animate({
+                        // left: (e.clientX-objImg.outerWidth()-(c))+"px",
+                        // top : (e.clientY-(objImg.outerHeight()/2)+(d))+"px"
+                        left: (e.clientX - (c)) + "px",
+                        top: (e.clientY - (objImg.outerHeight() / 2) + (d)) + "px"
+                    }, timeMoveTarget);
+                } else {
+                    obj.animate({
+                        left: (e.clientX - objImg.outerWidth() - (c)) + "px",
+                        top: (e.clientY - (objImg.outerHeight() / 2) + (d)) + "px"
+                            // left: (e.clientX)+"px",
+                            // top : e.clientY+"px"
+                    }, timeMoveTarget);
+                }
+
+                setTimeout(function() {
+                    food.remove();
+                }, timeMoveTarget);
+
+            }, timeAnimate)
+        });
+
+        // if (typeMove === 'left') {
+        //     typeMove = 'left';
+        //     objImg.rotate(180);
+        // }
+        // // jika object ke arah keatas
+        // else if (typeMove === 'top') {
+        //     typeMove = 'top';
+        //     objImg.rotate(270);
+        // }
+        // // jika object ke arah kekanan
+        // else if (typeMove === 'right') {
+        //     typeMove = 'right';
+        //     objImg.rotate(0);
+        // } // jika object ke arah kebawah
+        // else if (typeMove === 'bottom') {
+        //     typeMove = 'bottom';
+        //     objImg.rotate(90);
+        // }
+
+
+        // untuk bergerak
+        setInterval(function() {
+            if (!pause) {
+                position = setOffset(obj);
+                if (moveSpeed > 0) {
+                    if (typeMove === 'left') {
+                        position.left = position.left - moveSpeed;
+                        obj.css({
+                            "left": position.left + "px"
+                        });
+                    }
+                    // jika object ke arah keatas
+                    else if (typeMove === 'top') {
+                        position.top = position.top - moveSpeed;
+                        obj.css({
+                            "top": position.top + "px"
+                        });
+                    }
+                    // jika object ke arah kekanan
+                    else if (typeMove === 'right') {
+                        position.left = position.left + moveSpeed - 1;
+                        obj.css({
+                            "left": position.left + "px"
+                        });
+                    } // jika object ke arah kebawah
+                    else if (typeMove === 'bottom') {
+                        position.top = position.top + moveSpeed - 1;
+                        obj.css({
+                            "top": position.top + "px"
+                        });
+                    } else {
+                        a = 2;
+                        b = 2;
+                        position.top = position.top + a - 1;
+                        position.left = position.left + b - 1;
+                        obj.css({
+                            "top": position.top + "px",
+                            "left": position.left + "px"
+                        });
+                    }
+                }
+
+                if (obj2 != null) {
+                    position2 = setOffset(obj2);
+
+                    if (typeMove === "left") {
+                        position2.left -= moveSpeed;
+                        obj2.css({
+                            "left": (position2.left) + "px"
+                        });
+                    } else if (typeMove === "top") {
+                        position2.top -= moveSpeed;
+
+                        obj2.css({
+                            "top": (position2.top) + "px"
+                        });
+                    } else if (typeMove === "right") {
+                        position2.left += moveSpeed;
+
+                        obj2.css({
+                            "left": (position2.left) + "px"
+                        });
+                    } else if (typeMove === "bottom") {
+                        position2.top += moveSpeed;
+
+                        obj2.css({
+                            "top": (position2.top) + "px"
+                        });
+                    }
+
+                    // jika object ke arah kekiri
+                    if (position2.left + obj2.outerWidth() < template.outerWidth() && statusOver === true && typeMove === 'left') {
+                        obj.css({
+                            "left": position2.left + "px",
+                            "top": position2.top + "px"
+                        });
+                        position.left = position2.left;
+                        position.top = position2.top;
+                        obj2.remove();
+                        obj2 = null;
+                        statusOver = false;
+                    }
+                    // jika object ke arah keatas
+                    else if ((position2.top + obj2.outerHeight()) < template.outerHeight() && statusOver === true && typeMove === 'top') {
+                        obj.css({
+                            "left": position2.left + "px",
+                            "top": position2.top + "px"
+                        });
+                        position.left = position2.left;
+                        position.top = position2.top;
+                        obj2.remove();
+                        obj2 = null;
+                        statusOver = false;
+                    }
+                    // jika object ke arah kekanan
+                    else if (position2.left > positionTemplate.left && statusOver === true && typeMove === 'right') {
+                        obj.css({
+                            "left": position2.left + "px",
+                            "top": position2.top + "px"
+                        });
+                        position.left = position2.left;
+                        position.top = position2.top;
+                        obj2.remove();
+                        obj2 = null;
+
+                        statusOver = false;
+                    } // jika object ke arah kebawah
+                    else if (position2.top > positionTemplate.top && statusOver === true && typeMove === 'bottom') {
+                        obj.css({
+                            "left": position2.left + "px",
+                            "top": position2.top + "px"
+                        });
+                        position.left = position2.left;
+                        position.top = position2.top;
+                        obj2.remove();
+                        obj2 = null;
+
+                        statusOver = false;
+                    }
+                }
+                // jika object ke arah kekiri dan membuat object baru
+                if (position.left < positionTemplate.left && statusOver === false && obj2 == null && typeMove === 'left') {
+                    //posisi object utama
+                    position = setOffset(obj);
+                    // posisi rotasi object gambar utama
+                    a = getRotationDegrees(objImg);
+                    // membuat object
+                    obj2 = $("<div id='obj2' style='position:absolute;left:0;top:" + position.top + "px;border:0px solid black;border-radius:10px;height:50px;width:50px;'>" + contentImg + "</div>");
+                    template.append(obj2);
+                    obj2.css({
+                        '-webkit-transform': 'rotate(' + a + 'deg)',
+                        '-moz-transform': 'rotate(' + a + 'deg)',
+                        '-ms-transform': 'rotate(' + a + 'deg)',
+                        'transform': "rotate(" + a + "deg)",
+                        "left": (template.outerWidth()) + "px"
+                    });
+                    statusOver = true;
+                }
+                // jika object ke arah keatas dan membuat object baru
+                else if ((position.top) < positionTemplate.top && statusOver === false && obj2 == null && typeMove === 'top') {
+                    //posisi object utama
+                    position = setOffset(obj);
+                    // posisi rotasi object utama
+                    a = getRotationDegrees(objImg);
+                    // membuat object
+                    obj2 = $("<div id='obj2' style='position:absolute;left:0;top:0px;border:0px solid black;border-radius:10px;height:50px;width:50px;'>" + contentImg + "</div>");
+                    template.append(obj2);
+                    obj2.css({
+                        '-webkit-transform': 'rotate(' + a + 'deg)',
+                        '-moz-transform': 'rotate(' + a + 'deg)',
+                        '-ms-transform': 'rotate(' + a + 'deg)',
+                        'transform': "rotate(" + a + "deg)",
+                        "top": (template.outerHeight()) + "px",
+                        "left": (position.left) + "px"
+                    });
+                    statusOver = true;
+                }
+                // jika object ke arah kekanan dan membuat object baru
+                else if ((position.left + obj.outerWidth()) > positionTemplate.left + template.outerWidth() && statusOver === false && obj2 == null && typeMove === 'right') {
+                    //posisi object utama
+                    position = setOffset(obj);
+                    // posisi rotasi object utama
+                    a = getRotationDegrees(objImg);
+                    // membuat object
+                    obj2 = $("<div id='obj2' style='position:absolute;left:0;top:" + position.top + "px;border:0px solid black;border-radius:10px;height:50px;width:50px;'>" + contentImg + "</div>");
+                    template.append(obj2);
+                    obj2.css({
+                        '-webkit-transform': 'rotate(' + a + 'deg)',
+                        '-moz-transform': 'rotate(' + a + 'deg)',
+                        '-ms-transform': 'rotate(' + a + 'deg)',
+                        'transform': "rotate(" + a + "deg)",
+                        "left": (positionTemplate.left - obj2.width()) + "px"
+                    });
+                    statusOver = true;
+                } // jika object ke arah kekanan dan membuat object baru
+                else if ((position.top + obj.outerHeight()) > positionTemplate.top + template.outerHeight() && statusOver === false && obj2 == null && typeMove === 'bottom') {
+                    //posisi object utama
+                    position = setOffset(obj);
+                    // posisi rotasi object utama
+                    a = getRotationDegrees(objImg);
+                    // membuat object
+
+                    obj2 = $("<div id='obj2' style='position:absolute;left:" + position.left + "px;top:0px;border:0px solid black;border-radius:10px;height:50px;width:50px;'>" + contentImg + "</div>");
+                    template.append(obj2);
+                    obj2.css({
+                        '-webkit-transform': 'rotate(' + a + 'deg)',
+                        '-moz-transform': 'rotate(' + a + 'deg)',
+                        '-ms-transform': 'rotate(' + a + 'deg)',
+                        'transform': "rotate(" + a + "deg)",
+                        "top": (positionTemplate.top - obj2.height()) + "px"
+                    });
+                    statusOver = true;
+                }
+            }
+        }, 100);
+    </script>
+</body>
+
+</html>
